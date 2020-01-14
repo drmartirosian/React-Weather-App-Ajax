@@ -1,33 +1,43 @@
 import React, { Component } from 'react';
 import './App.css';
 import Map from '../../components/Map/Map';
-// export
 import { getCurrentLatLng } from '../../services/geolocation';
+import { getCurWeatherByLatLng } from '../../services/weather-api';
 
 class App extends Component {
-  // Initialize state
+
   state = {
     lat: null,
-    lng: null
+    lng: null,
+    temp: null
   };
 
-  // Add this method
   async componentDidMount() {
     // Destructure the object returned from getCurrentLatLng()
     const {lat, lng} = await getCurrentLatLng();
-    // Replace the console.log with the following
-  this.setState({lat, lng});
-    console.log(lat, lng);
+    const weatherData = await getCurWeatherByLatLng(lat, lng);
+    this.setState({
+      lat,
+      lng,
+      temp: Math.round(weatherData.main.temp),
+      icon: weatherData.weather[0].icon
+    });
   }
 
   render() {
     return (
       <div className='App'>
-        <Map
-          lat={this.state.lat}
-          lng={this.state.lng}
-        />
-        <header className='App-header'>REACT WEATHER</header>
+        <Map lat={this.state.lat} lng={this.state.lng}/>
+        <header className='App-header'>
+          <div>{this.state.temp}&deg;</div>
+          REACT WEATHER
+          {this.state.icon && 
+            <img
+              src={`https://openweathermap.org/img/w/${this.state.icon}.png`}
+              alt='Current Conditions'
+            />
+          }
+        </header>
       </div>
     );
   }
